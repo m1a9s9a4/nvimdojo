@@ -12,6 +12,7 @@ export interface RushProgress {
 export interface SaveData {
   progress: Record<string, ChallengeProgress>
   rush: Record<string, RushProgress>
+  daily: Record<string, { stars: number; keys: number }>
   xp: number
   streak: { last: string; count: number }
   hintsOn: boolean
@@ -22,6 +23,7 @@ const KEY = 'nvim-trainer-save-v1'
 const DEFAULT: SaveData = {
   progress: {},
   rush: {},
+  daily: {},
   xp: 0,
   streak: { last: '', count: 0 },
   hintsOn: true,

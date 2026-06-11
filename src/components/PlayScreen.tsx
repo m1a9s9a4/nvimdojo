@@ -9,6 +9,7 @@ interface Result {
   stats: WinStats
   stars: number
   xpGained: number
+  share?: string
 }
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
   onToggleHints: () => void
   onBack: () => void
   onNext: () => void
-  onCleared: (challenge: Challenge, stats: WinStats) => { stars: number; xpGained: number }
+  onCleared: (challenge: Challenge, stats: WinStats) => { stars: number; xpGained: number; share?: string }
 }
 
 const MODE_STYLE: Record<string, string> = {
@@ -49,8 +50,8 @@ export default function PlayScreen({
   }
 
   const handleWin = (stats: WinStats) => {
-    const { stars, xpGained } = onCleared(challenge, stats)
-    setResult({ stats, stars, xpGained })
+    const { stars, xpGained, share } = onCleared(challenge, stats)
+    setResult({ stats, stars, xpGained, share })
   }
 
   // wire vim ex commands (:h :r :n :q) to UI actions; refresh every render to avoid stale closures
@@ -150,6 +151,7 @@ export default function PlayScreen({
           stars={result.stars}
           xpGained={result.xpGained}
           hasNext={hasNext}
+          share={result.share}
           onRetry={reset}
           onNext={onNext}
         />

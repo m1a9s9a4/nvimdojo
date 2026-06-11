@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { CHALLENGES } from './data/challenges'
 import type { Rush } from './data/rushes'
+import { dailyShareText, getDaily, todayISO } from './engine/daily'
 import { loadSave, persist, recordRushWin, recordWin, type SaveData } from './engine/storage'
 import { starsFor } from './engine/scoring'
 import type { Challenge, WinStats } from './types'
@@ -14,12 +15,21 @@ export default function App() {
   saveRef.current = save
   const [current, setCurrent] = useState<Challenge | null>(null)
   const [currentRush, setCurrentRush] = useState<Rush | null>(null)
+  const [isDaily, setIsDaily] = useState(false)
+  const daily = useMemo(() => getDaily(), [])
 
   const handleCleared = (challenge: Challenge, stats: WinStats) => {
     const stars = starsFor(stats.keys, challenge.par)
     const { save: next, xpGained } = recordWin(saveRef.current, challenge.id, stats.keys, stars)
-    setSave(next)
-    return { stars, xpGained }
+    let final = next
+    let share: string | undefined
+    if (isDaily) {
+      final = { ...next, daily: { ...next.daily, [todayISO()]: { stars, keys: stats.keys } } }
+      persist(final)
+      share = dailyShareText(daily.day, stars, stats.keys, challenge.par)
+    }
+    setSave(final)
+    return { stars, xpGained, share }
   }
 
   const handleRushFinish = (rush: Rush, seconds: number, keys: number) => {
@@ -60,17 +70,30 @@ export default function App() {
         />
       ) : current ? (
         <PlayScreen
-          key={current.id}
+          key={`${isDaily ? 'daily-' : ''}${current.id}`}
           challenge={current}
-          hasNext={nextChallenge !== null}
+          hasNext={!isDaily && nextChallenge !== null}
           hintsOn={save.hintsOn}
           onToggleHints={toggleHints}
-          onBack={() => setCurrent(null)}
+          onBack={() => {
+            setCurrent(null)
+            setIsDaily(false)
+          }}
           onNext={() => nextChallenge && setCurrent(nextChallenge)}
           onCleared={handleCleared}
         />
       ) : (
-        <LevelSelect save={save} onPlay={setCurrent} onPlayRush={setCurrentRush} />
+        <LevelSelect
+          save={save}
+          daily={daily}
+          dailyDone={save.daily[todayISO()]}
+          onPlay={setCurrent}
+          onPlayRush={setCurrentRush}
+          onPlayDaily={() => {
+            setIsDaily(true)
+            setCurrent(daily.challenge)
+          }}
+        />
       )}
     </div>
   )

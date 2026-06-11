@@ -102,12 +102,14 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode, wi
 
     const onKeydown = (e: KeyboardEvent) => {
       if (won) return
-      // keys typed into the vim command line (after : or /) are meta, not golf strokes
+      // keys typed into the vim command line (after : or /) are meta, not golf strokes —
+      // unless the challenge is explicitly about ex commands / search
       const target = e.target as HTMLElement | null
-      if (target?.closest('.cm-panels, .cm-vim-panel, .cm-dialog')) return
+      if (!challenge.countCmdline && target?.closest('.cm-panels, .cm-vim-panel, .cm-dialog')) return
       const token = normalizeKey(e)
       if (!token) return
-      if (token === ':' && currentMode === 'normal') return
+      if (!challenge.countCmdline && (token === ':' || token === '/' || token === '?') && currentMode === 'normal')
+        return
       if (keystrokes.length === 0) startedAt = performance.now()
       keystrokes.push(token)
       onKeyRef.current(token)

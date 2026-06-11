@@ -7,13 +7,20 @@ import type { Challenge } from '../types'
 
 interface Props {
   save: SaveData
+  daily: { day: number; challenge: Challenge }
+  dailyDone?: { stars: number; keys: number }
   onPlay: (challenge: Challenge) => void
   onPlayRush: (rush: Rush) => void
+  onPlayDaily: () => void
 }
 
-type Item = { kind: 'rush'; rush: Rush } | { kind: 'challenge'; challenge: Challenge }
+type Item =
+  | { kind: 'daily' }
+  | { kind: 'rush'; rush: Rush }
+  | { kind: 'challenge'; challenge: Challenge }
 
 function itemId(item: Item) {
+  if (item.kind === 'daily') return 'daily'
   return item.kind === 'rush' ? item.rush.id : item.challenge.id
 }
 
@@ -21,9 +28,10 @@ function fmtSec(s: number) {
   return `${s.toFixed(1)}s`
 }
 
-export default function LevelSelect({ save, onPlay, onPlayRush }: Props) {
+export default function LevelSelect({ save, daily, dailyDone, onPlay, onPlayRush, onPlayDaily }: Props) {
   const flat = useMemo<Item[]>(
     () => [
+      { kind: 'daily' } as Item,
       ...RUSHES.map((rush) => ({ kind: 'rush', rush }) as Item),
       ...STAGES.flatMap((s) =>
         CHALLENGES.filter((c) => c.stage === s.id).map((challenge) => ({ kind: 'challenge', challenge }) as Item),
@@ -34,7 +42,8 @@ export default function LevelSelect({ save, onPlay, onPlayRush }: Props) {
   const [sel, setSel] = useState(0)
 
   const activate = (item: Item) => {
-    if (item.kind === 'rush') onPlayRush(item.rush)
+    if (item.kind === 'daily') onPlayDaily()
+    else if (item.kind === 'rush') onPlayRush(item.rush)
     else onPlay(item.challenge)
   }
 
@@ -64,6 +73,35 @@ export default function LevelSelect({ save, onPlay, onPlayRush }: Props) {
 
   return (
     <div className="space-y-6">
+      <section>
+        <button
+          id="level-daily"
+          onClick={onPlayDaily}
+          onMouseEnter={() => setSel(0)}
+          className={`w-full text-left rounded-lg border px-4 py-3 transition-colors ${
+            selectedId === 'daily'
+              ? 'border-sky-500 bg-zinc-900 ring-1 ring-sky-500/50'
+              : 'border-sky-900/60 bg-sky-950/20 hover:border-sky-600 hover:bg-zinc-900'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-sky-300">
+              📅 Daily #{daily.day} — {daily.challenge.title}
+            </span>
+            {dailyDone ? (
+              <span className="text-amber-400 text-sm">
+                {'★'.repeat(dailyDone.stars)}
+                <span className="text-zinc-700">{'★'.repeat(3 - dailyDone.stars)}</span>
+                <span className="text-xs text-zinc-500 ml-2">done · {dailyDone.keys} keys</span>
+              </span>
+            ) : (
+              <span className="text-xs text-sky-500">not played yet</span>
+            )}
+          </div>
+          <p className="text-xs text-zinc-500 mt-1">one challenge a day · share your result</p>
+        </button>
+      </section>
+
       <section>
         <div className="flex items-baseline gap-3 mb-2">
           <h2 className="text-sm font-bold text-rose-300">⚡ Rush Mode</h2>

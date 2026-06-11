@@ -17,6 +17,8 @@ export interface Challenge {
   cursor?: { line: number; col: number }
   /** show the avatar on world levels; disable where reading the character under the cursor matters */
   avatar?: boolean
+  /** count command-line (: and /) keystrokes toward the score — for search/substitute stages */
+  countCmdline?: boolean
   par: number
   commands: { new: string[]; allowed: string[] }
   solution: string[]
