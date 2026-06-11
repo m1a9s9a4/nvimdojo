@@ -7,7 +7,8 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import type { Challenge, WinStats } from '../types'
 import { normalizeKey } from '../engine/keys'
 import { registerExCommands } from '../engine/exBus'
-import { worldDecorations } from './worldDeco'
+import { goalHighlight, worldDecorations } from './worldDeco'
+import { worldFx } from './worldFx'
 
 interface Props {
   challenge: Challenge
@@ -15,9 +16,10 @@ interface Props {
   onKey: (token: string) => void
   onWin: (stats: WinStats) => void
   onMode?: (mode: string) => void
+  winDelayMs?: number
 }
 
-export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: Props) {
+export default function VimEditor({ challenge, attempt, onKey, onWin, onMode, winDelayMs = 650 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const onKeyRef = useRef(onKey)
   const onWinRef = useRef(onWin)
@@ -31,6 +33,7 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: 
     if (!container) return
 
     registerExCommands()
+    container.classList.remove('cleared')
 
     let won = false
     let currentMode = 'normal'
@@ -51,8 +54,9 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: 
       if (cleared) {
         won = true
         const seconds = startedAt ? (performance.now() - startedAt) / 1000 : 0
-        // brief pause so the final state is visible before the result modal
-        setTimeout(() => onWinRef.current({ keys: keystrokes.length, seconds, keystrokes }), 200)
+        container.classList.add('cleared')
+        // let the glow play before the result modal appears
+        setTimeout(() => onWinRef.current({ keys: keystrokes.length, seconds, keystrokes }), winDelayMs)
       }
     }
 
@@ -60,13 +64,25 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: 
       if (u.docChanged || u.selectionSet) checkWin(u.state)
     })
 
+    const startSelection = (() => {
+      if (!challenge.cursor) return undefined
+      const lines = challenge.start.split('\n')
+      let pos = 0
+      for (let i = 0; i < challenge.cursor.line && i < lines.length; i++) pos += lines[i].length + 1
+      return { anchor: Math.min(pos + challenge.cursor.col, challenge.start.length) }
+    })()
+
     const view = new EditorView({
       state: EditorState.create({
+        ...(startSelection ? { selection: startSelection } : {}),
         doc: challenge.start,
         extensions: [
           vim(),
           minimalSetup,
           ...(challenge.type === 'golf' ? [lineNumbers()] : []),
+          ...(challenge.type === 'golf' && challenge.win.type === 'reach'
+            ? [goalHighlight({ line: challenge.win.line, col: challenge.win.col })]
+            : []),
           oneDark,
           updateListener,
           ...(challenge.type === 'world'
@@ -76,6 +92,7 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: 
                     ? { line: challenge.win.line, col: challenge.win.col }
                     : undefined,
                 ),
+                ...(challenge.avatar !== false ? [worldFx()] : []),
               ]
             : []),
         ],
@@ -109,7 +126,7 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode }: 
       view.dom.removeEventListener('keydown', onKeydown, true)
       view.destroy()
     }
-  }, [challenge, attempt])
+  }, [challenge, attempt, winDelayMs])
 
   return (
     <div

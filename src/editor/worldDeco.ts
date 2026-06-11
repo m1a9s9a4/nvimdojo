@@ -9,6 +9,36 @@ const TILE_CLASS: Record<string, string> = {
   A: 'tile tile-altar',
   F: 'tile tile-flag',
   C: 'tile tile-camp',
+  S: 'tile tile-slime',
+  M: 'tile tile-goblin',
+}
+
+/** highlight a single reach-goal position in plain text (golf) levels */
+export function goalHighlight(goal: { line: number; col: number }) {
+  function build(view: EditorView): DecorationSet {
+    const builder = new RangeSetBuilder<Decoration>()
+    const doc = view.state.doc
+    if (goal.line < doc.lines) {
+      const line = doc.line(goal.line + 1)
+      if (goal.col < line.length) {
+        const pos = line.from + goal.col
+        builder.add(pos, pos + 1, Decoration.mark({ class: 'tile-goal' }))
+      }
+    }
+    return builder.finish()
+  }
+  return ViewPlugin.fromClass(
+    class {
+      decorations: DecorationSet
+      constructor(view: EditorView) {
+        this.decorations = build(view)
+      }
+      update(u: ViewUpdate) {
+        if (u.docChanged || u.viewportChanged) this.decorations = build(u.view)
+      }
+    },
+    { decorations: (v) => v.decorations },
+  )
 }
 
 export function worldDecorations(goal?: { line: number; col: number }) {

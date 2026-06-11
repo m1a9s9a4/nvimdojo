@@ -98,7 +98,17 @@ export default function PlayScreen({
         </div>
       </div>
 
+      {challenge.scene && (
+        <div className="rounded-lg border border-amber-900/60 bg-amber-950/20 px-3 py-2">
+          <p className="text-xs uppercase tracking-widest font-semibold text-amber-500">
+            🗺 {challenge.scene.place}
+          </p>
+          <p className="text-xs text-zinc-500 italic mt-0.5">{challenge.scene.flavor}</p>
+        </div>
+      )}
+
       <p className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200">
+        {challenge.type === 'world' ? '📜 ' : ''}
         {challenge.mission}
       </p>
 

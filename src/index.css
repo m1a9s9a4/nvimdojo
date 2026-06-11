@@ -29,6 +29,16 @@ body {
 
 .world .cm-editor {
   font-size: 24px;
+  background: radial-gradient(1200px 400px at 50% -10%, #11271a 0%, #0a120d 60%, #070b08 100%) !important;
+}
+
+.world .cm-activeLine {
+  background: transparent !important;
+}
+
+.world .cm-fat-cursor {
+  background: rgba(255, 255, 255, 0.14) !important;
+  outline: none !important;
 }
 
 .world .cm-gutters {
@@ -61,6 +71,8 @@ body {
 .tile-altar::after { content: "⛩️"; }
 .tile-flag::after { content: "🚩"; }
 .tile-camp::after { content: "⛺"; }
+.tile-slime::after { content: "👾"; }
+.tile-goblin::after { content: "👹"; }
 
 .tile-goal {
   background: rgba(250, 204, 21, 0.22);
@@ -70,4 +82,42 @@ body {
 
 @keyframes goalPulse {
   50% { background: rgba(250, 204, 21, 0.45); }
+}
+
+/* ---------- game fx ---------- */
+
+.world-avatar {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2ch;
+  font-size: 0.95em;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+  transition: left 0.12s ease-out, top 0.12s ease-out;
+}
+
+.world-pop {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  font-size: 0.9em;
+  animation: popBoom 0.45s ease-out forwards;
+}
+
+@keyframes popBoom {
+  0% { transform: scale(0.4); opacity: 1; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+.cleared .cm-editor {
+  animation: clearGlow 0.7s ease-out;
+}
+
+@keyframes clearGlow {
+  0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+  30% { box-shadow: 0 0 36px 6px rgba(250, 204, 21, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
 }

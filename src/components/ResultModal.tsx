@@ -63,9 +63,22 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
           <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">
             Pro solution ({challenge.solution.length} keys)
           </p>
-          <p className="font-mono text-sm break-all bg-zinc-950 rounded p-2 text-emerald-300">
-            {challenge.solution.join(' ')}
-          </p>
+          {challenge.solutionSteps ? (
+            <div className="bg-zinc-950 rounded p-2 space-y-1.5">
+              {challenge.solutionSteps.map((step, i) => (
+                <div key={i} className="flex items-baseline gap-3">
+                  <code className="font-mono text-sm text-emerald-300 whitespace-nowrap min-w-16">
+                    {step.keys}
+                  </code>
+                  <span className="text-xs text-zinc-400">{step.explain}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-mono text-sm break-all bg-zinc-950 rounded p-2 text-emerald-300">
+              {challenge.solution.join(' ')}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-2 justify-end items-center pt-1">

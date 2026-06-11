@@ -1,20 +1,30 @@
 import { useRef, useState } from 'react'
 import { CHALLENGES } from './data/challenges'
-import { loadSave, persist, recordWin, type SaveData } from './engine/storage'
+import type { Rush } from './data/rushes'
+import { loadSave, persist, recordRushWin, recordWin, type SaveData } from './engine/storage'
 import { starsFor } from './engine/scoring'
 import type { Challenge, WinStats } from './types'
 import LevelSelect from './components/LevelSelect'
 import PlayScreen from './components/PlayScreen'
+import RushScreen from './components/RushScreen'
 
 export default function App() {
   const [save, setSave] = useState<SaveData>(() => loadSave())
   const saveRef = useRef(save)
   saveRef.current = save
   const [current, setCurrent] = useState<Challenge | null>(null)
+  const [currentRush, setCurrentRush] = useState<Rush | null>(null)
 
   const handleCleared = (challenge: Challenge, stats: WinStats) => {
     const stars = starsFor(stats.keys, challenge.par)
     const { save: next, xpGained } = recordWin(saveRef.current, challenge.id, stats.keys, stars)
+    setSave(next)
+    return { stars, xpGained }
+  }
+
+  const handleRushFinish = (rush: Rush, seconds: number, keys: number) => {
+    const stars = seconds <= rush.gold ? 3 : seconds <= rush.silver ? 2 : 1
+    const { save: next, xpGained } = recordRushWin(saveRef.current, rush.id, seconds, keys, stars)
     setSave(next)
     return { stars, xpGained }
   }
@@ -40,7 +50,15 @@ export default function App() {
         </div>
       </header>
 
-      {current ? (
+      {currentRush ? (
+        <RushScreen
+          key={currentRush.id}
+          rush={currentRush}
+          best={save.rush[currentRush.id]}
+          onFinish={(seconds, keys) => handleRushFinish(currentRush, seconds, keys)}
+          onBack={() => setCurrentRush(null)}
+        />
+      ) : current ? (
         <PlayScreen
           key={current.id}
           challenge={current}
@@ -52,7 +70,7 @@ export default function App() {
           onCleared={handleCleared}
         />
       ) : (
-        <LevelSelect save={save} onPlay={setCurrent} />
+        <LevelSelect save={save} onPlay={setCurrent} onPlayRush={setCurrentRush} />
       )}
     </div>
   )
