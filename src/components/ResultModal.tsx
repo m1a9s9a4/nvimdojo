@@ -50,6 +50,11 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
             <span className="text-zinc-700">{'★'.repeat(3 - stars)}</span>
           </div>
           <h2 className="text-xl font-bold mt-1">Cleared!</h2>
+          {stats.keys < challenge.par && (
+            <p className="text-amber-300 text-sm mt-0.5">
+              🦅 Under par — you beat the lesson's own solution!
+            </p>
+          )}
           {xpGained > 0 && <p className="text-emerald-400 text-sm mt-0.5">+{xpGained} XP</p>}
         </div>
 
@@ -74,7 +79,7 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
         </div>
         <div>
           <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">
-            Pro solution ({challenge.solution.length} keys)
+            Lesson solution ({challenge.solution.length} keys — using this stage's commands)
           </p>
           {challenge.solutionSteps ? (
             <div className="bg-zinc-950 rounded p-2 space-y-1.5">
