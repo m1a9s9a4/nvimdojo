@@ -125,6 +125,16 @@ export default function PlayScreen({
 
       <div className="flex gap-4 items-start">
         <div className="flex-1 min-w-0 rounded-lg overflow-hidden border border-zinc-800">
+          {challenge.filename && (
+            <div className="flex items-center gap-2 bg-zinc-900 border-b border-zinc-800 px-3 py-1.5">
+              <span className="flex gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              </span>
+              <span className="font-mono text-xs text-zinc-400 ml-2">{challenge.filename}</span>
+            </div>
+          )}
           <VimEditor
             challenge={challenge}
             attempt={attempt}

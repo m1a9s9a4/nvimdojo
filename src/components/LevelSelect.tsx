@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CHALLENGES } from '../data/challenges'
+import { CODE_DOJO } from '../data/codeDojo'
 import { STAGES } from '../data/curriculum'
 import { RUSHES, type Rush } from '../data/rushes'
 import type { SaveData } from '../engine/storage'
@@ -33,6 +34,7 @@ export default function LevelSelect({ save, daily, dailyDone, onPlay, onPlayRush
     () => [
       { kind: 'daily' } as Item,
       ...RUSHES.map((rush) => ({ kind: 'rush', rush }) as Item),
+      ...CODE_DOJO.map((challenge) => ({ kind: 'challenge', challenge }) as Item),
       ...STAGES.flatMap((s) =>
         CHALLENGES.filter((c) => c.stage === s.id).map((challenge) => ({ kind: 'challenge', challenge }) as Item),
       ),
@@ -139,6 +141,46 @@ export default function LevelSelect({ save, daily, dailyDone, onPlay, onPlayRush
           })}
         </div>
       </section>
+      <section>
+        <div className="flex items-baseline gap-3 mb-2">
+          <h2 className="text-sm font-bold text-violet-300">💼 Code Dojo</h2>
+          <span className="text-xs text-zinc-600">real-world edits on real code — Go & TypeScript</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {CODE_DOJO.map((c) => {
+            const prog = save.progress[c.id]
+            const selected = selectedId === c.id
+            return (
+              <button
+                key={c.id}
+                id={`level-${c.id}`}
+                onClick={() => onPlay(c)}
+                onMouseEnter={() => setSel(flat.findIndex((i) => itemId(i) === c.id))}
+                className={`text-left rounded-lg border px-3 py-2.5 transition-colors ${
+                  selected
+                    ? 'border-violet-500 bg-zinc-900 ring-1 ring-violet-500/50'
+                    : 'border-zinc-800 bg-zinc-900/60 hover:border-violet-600 hover:bg-zinc-900'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold">
+                    {c.lang === 'go' ? '🐹' : '⚛️'} {c.title}
+                  </span>
+                  <span className="text-amber-400 text-sm">
+                    {'★'.repeat(prog?.stars ?? 0)}
+                    <span className="text-zinc-700">{'★'.repeat(3 - (prog?.stars ?? 0))}</span>
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-500 mt-1 font-mono">
+                  {c.filename} · par {c.par}
+                  {prog ? ` · best ${prog.bestKeys}` : ''}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
       {STAGES.map((stage) => {
         const list = CHALLENGES.filter((c) => c.stage === stage.id)
         return (

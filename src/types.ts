@@ -8,6 +8,10 @@ export interface Challenge {
   id: string
   stage: number
   type: LevelType
+  /** 'code' challenges live in the Code Dojo section instead of a stage */
+  track?: 'code'
+  lang?: 'go' | 'tsx'
+  filename?: string
   title: string
   mission: string
   scene?: { place: string; flavor: string }

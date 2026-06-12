@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { CHALLENGES } from './data/challenges'
+import { CODE_DOJO } from './data/codeDojo'
 import type { Rush } from './data/rushes'
 import { dailyShareText, getDaily, todayISO } from './engine/daily'
 import { loadSave, persist, recordRushWin, recordWin, type SaveData } from './engine/storage'
@@ -45,8 +46,9 @@ export default function App() {
     setSave(next)
   }
 
-  const idx = current ? CHALLENGES.findIndex((c) => c.id === current.id) : -1
-  const nextChallenge = idx >= 0 && idx < CHALLENGES.length - 1 ? CHALLENGES[idx + 1] : null
+  const allChallenges = [...CODE_DOJO, ...CHALLENGES]
+  const idx = current ? allChallenges.findIndex((c) => c.id === current.id) : -1
+  const nextChallenge = idx >= 0 && idx < allChallenges.length - 1 ? allChallenges[idx + 1] : null
 
   return (
     <div className="min-h-screen max-w-5xl mx-auto px-4 py-6">

@@ -4,6 +4,8 @@ import { EditorState } from '@codemirror/state'
 import { minimalSetup } from 'codemirror'
 import { vim, getCM } from '@replit/codemirror-vim'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { go } from '@codemirror/lang-go'
+import { javascript } from '@codemirror/lang-javascript'
 import type { Challenge, WinStats } from '../types'
 import { normalizeKey } from '../engine/keys'
 import { registerExCommands } from '../engine/exBus'
@@ -80,6 +82,8 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode, wi
           vim(),
           minimalSetup,
           ...(challenge.type === 'golf' ? [lineNumbers()] : []),
+          ...(challenge.lang === 'go' ? [go()] : []),
+          ...(challenge.lang === 'tsx' ? [javascript({ jsx: true, typescript: true })] : []),
           ...(challenge.type === 'golf' && challenge.win.type === 'reach'
             ? [goalHighlight({ line: challenge.win.line, col: challenge.win.col })]
             : []),
