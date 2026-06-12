@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CHALLENGES } from './data/challenges'
 import { CODE_DOJO } from './data/codeDojo'
-import type { Rush } from './data/rushes'
+import { RUSHES, type Rush } from './data/rushes'
 import { dailyShareText, getDaily, todayISO } from './engine/daily'
 import { loadSave, persist, recordRushWin, recordWin, type SaveData } from './engine/storage'
 import { starsFor } from './engine/scoring'
@@ -10,14 +10,47 @@ import LevelSelect from './components/LevelSelect'
 import PlayScreen from './components/PlayScreen'
 import RushScreen from './components/RushScreen'
 
+type Route =
+  | { kind: 'home' }
+  | { kind: 'level'; id: string }
+  | { kind: 'daily' }
+  | { kind: 'rush'; id: string }
+
+function parseHash(): Route {
+  const h = window.location.hash
+  if (h.startsWith('#/l/')) return { kind: 'level', id: decodeURIComponent(h.slice(4)) }
+  if (h === '#/daily') return { kind: 'daily' }
+  if (h.startsWith('#/rush/')) return { kind: 'rush', id: h.slice(7) }
+  return { kind: 'home' }
+}
+
+function navigate(hash: string) {
+  window.location.hash = hash
+}
+
+const ALL_CHALLENGES = [...CODE_DOJO, ...CHALLENGES]
+
 export default function App() {
   const [save, setSave] = useState<SaveData>(() => loadSave())
   const saveRef = useRef(save)
   saveRef.current = save
-  const [current, setCurrent] = useState<Challenge | null>(null)
-  const [currentRush, setCurrentRush] = useState<Rush | null>(null)
-  const [isDaily, setIsDaily] = useState(false)
+  const [route, setRoute] = useState<Route>(parseHash)
   const daily = useMemo(() => getDaily(), [])
+
+  useEffect(() => {
+    const onHash = () => setRoute(parseHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  const isDaily = route.kind === 'daily'
+  const current: Challenge | null = isDaily
+    ? daily.challenge
+    : route.kind === 'level'
+      ? (ALL_CHALLENGES.find((c) => c.id === route.id) ?? null)
+      : null
+  const currentRush: Rush | null =
+    route.kind === 'rush' ? (RUSHES.find((r) => r.id === route.id) ?? null) : null
 
   const handleCleared = (challenge: Challenge, stats: WinStats) => {
     const stars = starsFor(stats.keys, challenge.par)
@@ -46,9 +79,8 @@ export default function App() {
     setSave(next)
   }
 
-  const allChallenges = [...CODE_DOJO, ...CHALLENGES]
-  const idx = current ? allChallenges.findIndex((c) => c.id === current.id) : -1
-  const nextChallenge = idx >= 0 && idx < allChallenges.length - 1 ? allChallenges[idx + 1] : null
+  const idx = current && !isDaily ? ALL_CHALLENGES.findIndex((c) => c.id === current.id) : -1
+  const nextChallenge = idx >= 0 && idx < ALL_CHALLENGES.length - 1 ? ALL_CHALLENGES[idx + 1] : null
 
   return (
     <div className="min-h-screen max-w-5xl mx-auto px-4 py-6">
@@ -68,7 +100,7 @@ export default function App() {
           rush={currentRush}
           best={save.rush[currentRush.id]}
           onFinish={(seconds, keys) => handleRushFinish(currentRush, seconds, keys)}
-          onBack={() => setCurrentRush(null)}
+          onBack={() => navigate('')}
         />
       ) : current ? (
         <PlayScreen
@@ -77,11 +109,8 @@ export default function App() {
           hasNext={!isDaily && nextChallenge !== null}
           hintsOn={save.hintsOn}
           onToggleHints={toggleHints}
-          onBack={() => {
-            setCurrent(null)
-            setIsDaily(false)
-          }}
-          onNext={() => nextChallenge && setCurrent(nextChallenge)}
+          onBack={() => navigate('')}
+          onNext={() => nextChallenge && navigate(`#/l/${nextChallenge.id}`)}
           onCleared={handleCleared}
         />
       ) : (
@@ -89,12 +118,9 @@ export default function App() {
           save={save}
           daily={daily}
           dailyDone={save.daily[todayISO()]}
-          onPlay={setCurrent}
-          onPlayRush={setCurrentRush}
-          onPlayDaily={() => {
-            setIsDaily(true)
-            setCurrent(daily.challenge)
-          }}
+          onPlay={(c) => navigate(`#/l/${c.id}`)}
+          onPlayRush={(r) => navigate(`#/rush/${r.id}`)}
+          onPlayDaily={() => navigate('#/daily')}
         />
       )}
     </div>

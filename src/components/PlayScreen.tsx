@@ -164,6 +164,7 @@ export default function PlayScreen({
           share={result.share}
           onRetry={reset}
           onNext={onNext}
+          onLevels={onBack}
         />
       )}
     </div>

@@ -10,9 +10,20 @@ interface Props {
   share?: string
   onRetry: () => void
   onNext: () => void
+  onLevels: () => void
 }
 
-export default function ResultModal({ challenge, stats, stars, xpGained, hasNext, share, onRetry, onNext }: Props) {
+export default function ResultModal({
+  challenge,
+  stats,
+  stars,
+  xpGained,
+  hasNext,
+  share,
+  onRetry,
+  onNext,
+  onLevels,
+}: Props) {
   const [copied, setCopied] = useState(false)
 
   const copyShare = () => {
@@ -30,6 +41,10 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
         e.preventDefault()
         e.stopPropagation()
         onNext()
+      } else if (e.key === 'q') {
+        e.preventDefault()
+        e.stopPropagation()
+        onLevels()
       } else if (e.key === 'c' && share) {
         e.preventDefault()
         e.stopPropagation()
@@ -39,7 +54,7 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
     window.addEventListener('keydown', onKeydown, true)
     return () => window.removeEventListener('keydown', onKeydown, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasNext, onRetry, onNext, share])
+  }, [hasNext, onRetry, onNext, onLevels, share])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -112,7 +127,16 @@ export default function ResultModal({ challenge, stats, stars, xpGained, hasNext
         )}
 
         <div className="flex gap-2 justify-end items-center pt-1">
-          <span className="mr-auto text-xs font-mono text-zinc-600">r retry{hasNext ? ' · n next' : ''}{share ? ' · c copy' : ''}</span>
+          <span className="mr-auto text-xs font-mono text-zinc-600">
+            r retry · q levels{hasNext ? ' · n next' : ''}
+            {share ? ' · c copy' : ''}
+          </span>
+          <button
+            onClick={onLevels}
+            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800"
+          >
+            Levels <kbd className="text-zinc-500">q</kbd>
+          </button>
           <button
             onClick={onRetry}
             className="px-4 py-2 rounded-lg border border-zinc-700 text-sm hover:bg-zinc-800"
