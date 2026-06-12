@@ -1,19 +1,9 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view'
 
-const AVATAR = '🦊'
-
 export function worldFx() {
   return ViewPlugin.fromClass(
     class {
-      avatar: HTMLElement
-
-      constructor(private view: EditorView) {
-        this.avatar = document.createElement('div')
-        this.avatar.className = 'world-avatar'
-        this.avatar.textContent = AVATAR
-        view.scrollDOM.appendChild(this.avatar)
-        view.requestMeasure({ read: () => this.place() })
-      }
+      constructor(private view: EditorView) {}
 
       update(u: ViewUpdate) {
         if (u.docChanged) {
@@ -25,9 +15,6 @@ export function worldFx() {
             u.view.requestMeasure({ read: () => hitSpots.forEach((p) => this.pop(p)) })
           }
         }
-        if (u.selectionSet || u.docChanged || u.geometryChanged) {
-          u.view.requestMeasure({ read: () => this.place() })
-        }
       }
 
       coords(pos: number) {
@@ -38,16 +25,7 @@ export function worldFx() {
         return {
           left: c.left - box.left + this.view.scrollDOM.scrollLeft,
           top: c.top - box.top + this.view.scrollDOM.scrollTop,
-          height: c.bottom - c.top,
         }
-      }
-
-      place() {
-        const c = this.coords(this.view.state.selection.main.head)
-        if (!c) return
-        this.avatar.style.left = `${c.left}px`
-        this.avatar.style.top = `${c.top}px`
-        this.avatar.style.height = `${c.height}px`
       }
 
       pop(pos: number) {
@@ -60,10 +38,6 @@ export function worldFx() {
         el.style.top = `${c.top}px`
         this.view.scrollDOM.appendChild(el)
         setTimeout(() => el.remove(), 500)
-      }
-
-      destroy() {
-        this.avatar.remove()
       }
     },
   )

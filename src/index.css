@@ -37,8 +37,9 @@ body {
 }
 
 .world .cm-fat-cursor {
-  background: rgba(255, 255, 255, 0.14) !important;
-  outline: none !important;
+  background: rgba(250, 204, 21, 0.45) !important;
+  outline: 1px solid rgba(250, 204, 21, 0.8) !important;
+  border-radius: 3px;
 }
 
 .world .cm-gutters {
@@ -85,19 +86,6 @@ body {
 }
 
 /* ---------- game fx ---------- */
-
-.world-avatar {
-  position: absolute;
-  z-index: 20;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.2ch;
-  font-size: 0.95em;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
-  transition: left 0.12s ease-out, top 0.12s ease-out;
-}
 
 .world-pop {
   position: absolute;

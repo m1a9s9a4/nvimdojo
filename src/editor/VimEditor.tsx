@@ -92,7 +92,7 @@ export default function VimEditor({ challenge, attempt, onKey, onWin, onMode, wi
                     ? { line: challenge.win.line, col: challenge.win.col }
                     : undefined,
                 ),
-                ...(challenge.avatar !== false ? [worldFx()] : []),
+                worldFx(),
               ]
             : []),
         ],
