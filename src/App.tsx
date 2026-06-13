@@ -86,7 +86,7 @@ export default function App() {
     <div className="min-h-screen max-w-5xl mx-auto px-4 py-6">
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-base font-bold tracking-tight font-mono">
-          <span className="text-tn-green prompt-glow">❯</span> nvim-trainer
+          <span className="text-tn-green prompt-glow">❯</span> nvimdojo
           <span className="cursor-blink text-tn-blue">▊</span>
           <span className="text-zinc-600 text-xs font-normal ml-3">-- ALPHA --</span>
         </h1>
